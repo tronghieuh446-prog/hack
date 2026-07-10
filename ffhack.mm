@@ -122,11 +122,11 @@ static void FFHackInit() {
         void *lib = dlopen("/usr/lib/libSystem.B.dylib", RTLD_NOW);
         if(!lib) lib = RTLD_DEFAULT;
         
-        orig_stat       = dlsym(lib, "stat");
-        orig_access     = dlsym(lib, "access");
-        orig_sysctl     = dlsym(lib, "sysctl");
-        orig_getaddrinfo = dlsym(lib, "getaddrinfo");
-        orig_connect    = dlsym(lib, "connect");
+        orig_stat        = (int(*)(const char*, struct stat*))dlsym(lib, "stat");
+        orig_access      = (int(*)(const char*, int))dlsym(lib, "access");
+        orig_sysctl      = (int(*)(int*, u_int, void*, size_t*, void*, size_t))dlsym(lib, "sysctl");
+        orig_getaddrinfo = (int(*)(const char*, const char*, const struct addrinfo*, struct addrinfo**))dlsym(lib, "getaddrinfo");
+        orig_connect     = (int(*)(int, const struct sockaddr*, socklen_t))dlsym(lib, "connect");
         
         Class uid = objc_getClass("UIDevice");
         if(uid) {
@@ -140,7 +140,7 @@ static void FFHackInit() {
             if(m) orig_bid = (id(*)(id,SEL))method_setImplementation(m, (IMP)hooked_bid);
         }
         
-        NSLog(@"[FFHack] Loaded - Antiband + DNS + Wallhack + NoRecoil");
+        NSLog(@"[FFHack] Loaded OK");
         
     } @catch(NSException *e) {
         NSLog(@"[FFHack] Error: %@", e);
