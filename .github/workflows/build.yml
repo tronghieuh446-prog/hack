@@ -1,4 +1,4 @@
-name: Build FFHack
+name: Build FFHack DEB
 on:
   push:
     branches: [ main ]
@@ -9,12 +9,48 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Compile
+      - name: Compile dylib
         run: |
-          clang++ -arch arm64 -dynamiclib -O2 -mios-version-min=15.0 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -framework Foundation -framework CoreFoundation -framework UIKit -o FFHack.dylib FFHack.mm
+          make
           ls -la FFHack.dylib
-      - name: Upload
+      - name: Create DEB
+        run: |
+          mkdir -p deb/DEBIAN
+          mkdir -p deb/Library/MobileSubstrate/DynamicLibraries
+          cp FFHack.dylib deb/Library/MobileSubstrate/DynamicLibraries/
+          cat > deb/DEBIAN/control << EOF
+          Package: com.ffhack.mod
+          Name: FFHack
+          Version: 1.0
+          Architecture: iphoneos-arm
+          Description: FFHack Mod Menu for Free Fire
+          Maintainer: FFHack
+          Section: Tweaks
+          EOF
+          cat > deb/Library/MobileSubstrate/DynamicLibraries/FFHack.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>Filter</key>
+              <dict>
+                  <key>Bundles</key>
+                  <array>
+                      <string>com.garena.game.freefireth</string>
+                  </array>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          dpkg-deb -b deb FFHack.deb
+          ls -la FFHack.deb
+      - name: Upload DEB
         uses: actions/upload-artifact@v4
         with:
-          name: FFHack
+          name: FFHack-DEB
+          path: FFHack.deb
+      - name: Upload Dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: FFHack-Dylib
           path: FFHack.dylib
