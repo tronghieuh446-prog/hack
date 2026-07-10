@@ -11,10 +11,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Compile
         run: |
-          clang++ -arch arm64 -dynamiclib -O2 -mios-version-min=15.0 \
-            -isysroot $(xcrun --sdk iphoneos --show-sdk-path) \
-            -framework Foundation -framework CoreFoundation -framework UIKit \
-            -o FFHack.dylib FFHack.mm
+          clang++ -arch arm64 -dynamiclib -O2 -mios-version-min=15.0 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -framework Foundation -framework CoreFoundation -framework UIKit -o FFHack.dylib FFHack.mm
           ls -la FFHack.dylib
       - name: Upload
         uses: actions/upload-artifact@v4
