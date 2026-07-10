@@ -1,4 +1,4 @@
-name: Build FFHack DEB
+name: Build FFHack Framework
 on:
   push:
     branches: [ main ]
@@ -13,42 +13,40 @@ jobs:
         run: |
           make
           ls -la FFHack.dylib
-      - name: Create DEB
+      - name: Create Framework
         run: |
-          mkdir -p deb/DEBIAN
-          mkdir -p deb/Library/MobileSubstrate/DynamicLibraries
-          cp FFHack.dylib deb/Library/MobileSubstrate/DynamicLibraries/
-          cat > deb/DEBIAN/control << EOF
-          Package: com.ffhack.mod
-          Name: FFHack
-          Version: 1.0
-          Architecture: iphoneos-arm
-          Description: FFHack Mod Menu for Free Fire
-          Maintainer: FFHack
-          Section: Tweaks
-          EOF
-          cat > deb/Library/MobileSubstrate/DynamicLibraries/FFHack.plist << EOF
+          mkdir -p FFHack.framework
+          cp FFHack.dylib FFHack.framework/FFHack
+          cat > FFHack.framework/Info.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-              <key>Filter</key>
-              <dict>
-                  <key>Bundles</key>
-                  <array>
-                      <string>com.garena.game.freefireth</string>
-                  </array>
-              </dict>
+              <key>CFBundleExecutable</key>
+              <string>FFHack</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.ffhack.mod</string>
+              <key>CFBundleInfoDictionaryVersion</key>
+              <string>6.0</string>
+              <key>CFBundleName</key>
+              <string>FFHack</string>
+              <key>CFBundlePackageType</key>
+              <string>FMWK</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>MinimumOSVersion</key>
+              <string>15.0</string>
           </dict>
           </plist>
           EOF
-          dpkg-deb -b deb FFHack.deb
-          ls -la FFHack.deb
-      - name: Upload DEB
+          ls -la FFHack.framework/
+      - name: Upload Framework
         uses: actions/upload-artifact@v4
         with:
-          name: FFHack-DEB
-          path: FFHack.deb
+          name: FFHack-Framework
+          path: FFHack.framework
       - name: Upload Dylib
         uses: actions/upload-artifact@v4
         with:
